@@ -231,6 +231,6 @@ def extract_rationale(query, contexts, answer):
     generated_text = result[0]["generated_text"]
 
     # Return the portion after the last instruction marker
-    rationale_output = generated_text.split("Important supporting context:")[-1].strip()
+    rationale_output = generated_text.split("Important supporting context:")[-1].split("</think>")[-1].strip()
 
     return rationale_output
