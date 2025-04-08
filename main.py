@@ -1,5 +1,7 @@
 from XAI_System.pipeline import run_xai_system
+from Retrieval_study.pipeline import run_retrieval_study
 from Hallucination_study.pipeline import run_hallucination_study
+
 
 
 
@@ -15,6 +17,12 @@ if __name__ == "__main__":
                    query = 'What is the impact of rising interest rates on corporate investments and real estate?',
                    k = 5,
                    approach = 'cosine')
+    
+    
+    
+    run_retrieval_study(DATASET_TYPE='tatqa',   # 'finqa' or 'tatqa'
+                        retrievals=['E5', 'Contriever', 'FinBERT', 'FinGPT'],    # one or more of the four
+                        k=5)
     
     
     
