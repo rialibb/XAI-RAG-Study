@@ -32,7 +32,7 @@ We combine **retrieval benchmarking**, **hallucination detection**, **ablation t
 │   └── preprocessing.py           # PDF text and table extraction for financial documents
 │
 ├── Retrieval_study/              # Retrieval performance benchmarking
-│   ├── pipeline.py                # Runs experiments on FinQA and TATQA
+│   ├── pipeline.py                # Runs experiments on FinQA and TATQA (RAGBench dataset)
 │   ├── retrievals.py              # Retrieval strategies (E5, FinBERT, Contriever, FinGPT)
 │   └── metrics.py                 # Evaluation metrics (Recall, NDCG, etc.)
 │
