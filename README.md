@@ -75,7 +75,7 @@ python main.py
 ```
 
 This will:
-- Extract context from a financial PDF
+- Extract context from a financial PDF with similarity scores
 - Generate an answer using LLMs
 - Detect hallucinations
 - Run ablation (context sensitivity) testing
@@ -92,7 +92,7 @@ This will:
 - `FinGPT` (LoRA over `NousResearch/Llama-2-7b-hf`)
 
 ### ✅ Generation & Judging Models:
-- `deepseek-ai/DeepSeek-R1-Distill-Llama-8B`
+- `deepseek-ai/DeepSeek-R1-Distill-Llama-8B` (for generation)
 - `unsloth/Llama-3.3-70B-Instruct-bnb-4bit` (for hallucination judgment)
 
 ---
