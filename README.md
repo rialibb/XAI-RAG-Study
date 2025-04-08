@@ -51,12 +51,13 @@ We combine **retrieval benchmarking**, **hallucination detection**, **ablation t
 
 ### ✅ **RAGTruth** *(for hallucination detection)*  
 - Used in `Hallucination_study`
-- Source: [RAGTruth: Evaluating Hallucination in Retrieval-Augmented Generation](https://arxiv.org/abs/2310.03682)
+- paper: [RAGTruth: A Hallucination Corpus for Developing Trustworthy Retrieval-Augmented Language Models](https://arxiv.org/abs/2401.00396)
 - Covers various task types: `QA`, `Summary`, `Data2txt`
 
 ### ✅ **RAGBench** *(for retrieval benchmarking)*  
 - Used in `Retrieval_study`
-- Source: [RAGBench: Evaluating Retrieval-Augmented Generation](https://huggingface.co/datasets/rungalileo/ragbench)
+- paper: [RAGBench: Explainable Benchmark for Retrieval-Augmented Generation Systems](https://arxiv.org/abs/2407.11005)
+- Source: [HuggingFace](https://huggingface.co/datasets/rungalileo/ragbench)
 - We focus on **`finqa`** and **`tatqa`**, which are tailored to financial QA.
 
 ---
