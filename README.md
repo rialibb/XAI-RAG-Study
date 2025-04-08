@@ -9,7 +9,7 @@ This project aims to **analyze and enhance the explainability of Retrieval-Augme
 
 We combine **retrieval benchmarking**, **hallucination detection**, **ablation testing**, and **self-rationale extraction** to deeply understand and improve the behavior of RAG systems.
 
-![Project Architecture](images/schema.png)
+![Project Architecture](images/architecture.png)
 ---
 
 ## 🌟 Objectives
