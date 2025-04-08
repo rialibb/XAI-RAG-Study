@@ -17,6 +17,24 @@ device = "cuda" if torch.cuda.is_available() else "cpu"  # Ensure device consist
 
 
 def import_models(retrievals):
+    """
+    Loads and initializes the specified retrieval models and their tokenizers.
+
+    Args:
+        retrievals (list): List of model names to load. Options include: 'E5', 'Contriever', 'FinBERT', 'FinGPT'.
+
+    Returns:
+        tuple:
+            - models (dict): A dictionary mapping model names to loaded model instances.
+            - tokenizers (dict): A dictionary mapping model names to their corresponding tokenizers.
+
+    Process:
+        - For each specified model name:
+            - Loads the pretrained model and tokenizer (if required).
+            - Moves the model to the appropriate device (CPU or GPU).
+            - For FinGPT, loads both the base model and LoRA adapter via PEFT.
+        - Returns dictionaries containing the initialized models and tokenizers.
+    """
     
     models = {}
     tokenizers = {}
@@ -62,6 +80,26 @@ def import_models(retrievals):
 def run_retrieval_study(DATASET_TYPE='tatqa',   # 'finqa' or 'tatqa'
                         retrievals=['E5', 'Contriever', 'FinBERT', 'FinGPT'],    # one or more of the four
                         k=5):   
+    """
+    Runs a retrieval benchmarking study using specified retrievers on a financial QA dataset.
+
+    Args:
+        DATASET_TYPE (str): The dataset to use for evaluation ('finqa' or 'tatqa') from the RAGBench benchmark.
+        retrievals (list): List of retriever model names to evaluate ('E5', 'Contriever', 'FinBERT', 'FinGPT').
+        k (int): Number of top documents to retrieve for each question.
+
+    Returns:
+        None: Prints average Recall@k and NDCG@k scores for each retriever to the console.
+
+    Process:
+        - Loads the RAGBench dataset from Hugging Face (`finqa` or `tatqa` split).
+        - Flattens document sentences and normalizes relevant sentence keys.
+        - Dynamically loads the selected retriever models and tokenizers.
+        - For each question:
+            - Retrieves top-k documents using each specified retriever.
+            - Calculates Recall@k and NDCG@k using the ground truth relevance labels.
+        - Aggregates results and prints average performance metrics per retriever.
+    """
 
     # Load the dataset
     df = pd.read_parquet(f"hf://datasets/rungalileo/ragbench/{DATASET_TYPE}/test-00000-of-00001.parquet")
@@ -118,6 +156,3 @@ def run_retrieval_study(DATASET_TYPE='tatqa',   # 'finqa' or 'tatqa'
         print(f"NDCG = {np.mean(results[retrieval]['ndcg']).item():.4f}")
         print('\n')
 
-
-
-run_retrieval_study()

@@ -9,6 +9,23 @@ random.seed(2024)
 
 
 def get_json_data(data):
+    """
+    Converts a DataFrame of annotated hallucination data into a structured JSON-compatible format.
+
+    Args:
+        data (pandas.DataFrame): DataFrame containing hallucination annotations and source information.
+
+    Returns:
+        list of dict: A list of dictionaries, each representing one example with formatted labels and references.
+
+    Process:
+        - Iterates over each row in the DataFrame and converts it to a dictionary.
+        - Removes the 'prompt' field and adds a 'type' field with value 'response'.
+        - Organizes hallucination labels into two categories: 'baseless info' and 'conflict'.
+        - Based on task type (`QA`, `Summary`, or `Data2txt`), extracts the appropriate reference context.
+        - Appends the reformatted example to the output list.
+    """
+
     to_save = []
     for idx, row in data.iterrows():
         d = row.to_dict()
@@ -35,7 +52,27 @@ def get_json_data(data):
 
 
 
+
+
+
 def read_ragtruth_split(ragtruth_dir, split):
+    """
+    Loads and filters a specific split from the RAGTruth dataset, merging response and source information.
+
+    Args:
+        ragtruth_dir (str): Path to the directory containing RAGTruth files.
+        split (str): Dataset split to load ('train', 'dev', or 'test').
+
+    Returns:
+        pandas.DataFrame: A merged DataFrame containing high-quality responses and their source context.
+
+    Process:
+        - Reads the 'response.jsonl' file and filters for entries with the specified split and quality set to 'good'.
+        - Reads the 'source_info.jsonl' file containing reference contexts.
+        - Merges both datasets on the shared `source_id` field.
+        - Prints the shape of the resulting DataFrame and returns it.
+    """
+    
     resp = pd.read_json(path.join(ragtruth_dir, 'response.jsonl'), lines=True)
     test = resp[(resp['split']==split)&(resp['quality']=='good')]
     oc = pd.read_json(path.join(ragtruth_dir, 'source_info.jsonl'), lines=True)
@@ -47,11 +84,28 @@ def read_ragtruth_split(ragtruth_dir, split):
 
 
 
-# do not split sentence
+
+
+
+
 def get_data():
-    # process train
-    # split into train and dev(10%) group by source_id
-    # reference, prompt, labels, sentence
+    """
+    Processes and splits the RAGTruth dataset into train, dev, and test sets in JSONL format.
+
+    Args:
+        None
+
+    Returns:
+        None: Writes three files ('train.jsonl', 'dev.jsonl', 'test.jsonl') to the dataset directory.
+
+    Process:
+        - Loads the 'train' split from RAGTruth and performs stratified sampling by task type to create a dev set (50 examples per type).
+        - Splits the data into training and development sets based on sampled `source_id`s.
+        - Formats the data using `get_json_data()` to organize hallucination labels and references.
+        - Saves the processed training and dev examples to JSONL files.
+        - Loads, processes, and writes the 'test' split in the same format.
+    """
+
     data = read_ragtruth_split('./Hallucination_study/dataset', 'train')
     dev_source_id = []
     for task in ['QA', 'Summary', 'Data2txt']:

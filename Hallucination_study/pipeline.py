@@ -16,6 +16,26 @@ from Hallucination_study.prepare_dataset import get_data
 
 
 def generate_response(data, pipeline):
+    """
+    Generates a hallucination detection response using a given LLM pipeline and input data.
+
+    Args:
+        data (dict): Dictionary containing task input fields such as:
+            - 'question', 'reference', 'response', and 'labels'.
+        pipeline (transformers.Pipeline): Hugging Face generation pipeline for hallucination judgment.
+
+    Returns:
+        dict: A copy of the input data with an additional field:
+            - 'pred' (dict): Parsed prediction output from the model, containing hallucinated spans.
+
+    Process:
+        - Builds a hallucination detection prompt using `process_dialog_to_single_turn`.
+        - Wraps the prompt in a system-user message format for model input.
+        - Uses the generation pipeline to produce a text response.
+        - Searches the response for JSON-formatted hallucination predictions.
+        - Parses the first valid JSON segment and attaches it to the original data under the key 'pred'.
+    """
+
     input_prompt = process_dialog_to_single_turn(data, None, return_prompt=True)
 
     messages = [
@@ -51,6 +71,27 @@ def generate_response(data, pipeline):
 def run_hallucination_study(raw_dataset="./Hallucination_study/dataset/test.jsonl",
                             output_file="./Hallucination_study/dataset/prediction.jsonl",
                             model_id="unsloth/Llama-3.3-70B-Instruct-bnb-4bit"):
+    """
+    Runs a full hallucination detection pipeline using a specified LLM on the RAGTruth dataset.
+
+    Args:
+        raw_dataset (str, optional): Path to the input JSONL file containing hallucination evaluation data.
+                                     Default is './Hallucination_study/dataset/test.jsonl'.
+        output_file (str, optional): Path to save the prediction results. Default is './Hallucination_study/dataset/prediction.jsonl'.
+        model_id (str, optional): Hugging Face model identifier for the hallucination judge. Default is 'unsloth/Llama-3.3-70B-Instruct-bnb-4bit'.
+
+    Returns:
+        None: Outputs model predictions to a JSONL file and prints evaluation metrics to the console.
+
+    Process:
+        1. Checks for existence of required dataset splits (train, dev, test); generates them if missing.
+        2. Loads the evaluation data from the specified test split file.
+        3. Initializes the LLM hallucination detection model via Hugging Face pipeline.
+        4. Iterates through all samples and generates hallucination predictions using the model.
+        5. Writes all predictions to the specified output file in JSONL format.
+        6. Computes and prints hallucination detection metrics (Accuracy, Precision, Recall, F1)
+           across the entire dataset and per task type (QA, Summary, Data2txt).
+    """
     
     # Step 1: Check if dataset files exist; if not, generate them
     required_files = ["train.jsonl", "dev.jsonl", "test.jsonl"]

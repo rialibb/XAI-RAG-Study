@@ -17,6 +17,29 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def retrieve_with_contriever(question, chunks, k, approach='cosine'):
+    """
+    Retrieves top-k relevant chunks using the Contriever model with either cosine similarity or an SVM-based approach.
+
+    Args:
+        question (str): The user query to retrieve relevant information for.
+        chunks (list of str): List of document chunks (sentences or passages).
+        k (int): Number of top chunks to retrieve.
+        approach (str): Similarity method to use: 'cosine' (default) or 'svm'.
+
+    Returns:
+        list of tuples: List of top-k retrieved chunks and their corresponding similarity scores.
+
+    Process:
+        - Loads the pretrained Contriever model and tokenizer.
+        - Encodes the question and all chunks into embeddings using mean pooling of hidden states.
+        - If approach is 'cosine':
+            - Computes cosine similarity between the query and all chunks.
+            - Selects the top-k highest scoring chunks.
+        - If approach is 'svm':
+            - Concatenates the query and chunk embeddings as input to an SVM classifier.
+            - Uses decision scores to rank and select the top-k most relevant chunks.
+        - Returns a list of (chunk, score) tuples.
+    """
 
     print('START RETRIEVAL:.....................')
     # Load retrieval models
@@ -56,7 +79,28 @@ def retrieve_with_contriever(question, chunks, k, approach='cosine'):
 
 
 
+
+
+
 def generate_llm_response(query, contexts):
+    """
+    Generates a short, fact-based answer to a financial query using a language model and provided context.
+
+    Args:
+        query (str): The financial question to be answered.
+        contexts (list of str): List of retrieved document chunks used as context.
+
+    Returns:
+        str: The generated answer based strictly on the provided context.
+
+    Process:
+        - Loads the DeepSeek-Llama model using Hugging Face's `pipeline`.
+        - Joins the context chunks into a single formatted string.
+        - Constructs a strict instruction-based prompt to enforce factuality and prevent reasoning or hallucination.
+        - Uses the language model to generate a response from the prompt.
+        - Extracts and cleans the answer from the generated text.
+    """
+
     print('LOADING GENERATOR MODEL:.....................')
     model_id = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
     generator = pipeline(
@@ -92,7 +136,12 @@ def generate_llm_response(query, contexts):
 
 
 
+
 def process_dialog_to_single_turn(data):
+    """
+    Constructs a hallucination detection prompt for a single-turn QA interaction.
+    """
+    
     TEMPLATE=(
             "Below is a question:\n"
             "{question}\n\n"
@@ -118,7 +167,29 @@ def process_dialog_to_single_turn(data):
 
 
 
+
 def detect_hallucination(data):
+    """
+    Uses an LLM to detect hallucinations in a generated response based on a given question and reference context.
+
+    Args:
+        data (dict): Dictionary containing:
+            - 'question' (str): The input query.
+            - 'reference' (str or list): The source context or passages.
+            - 'response' (str): The generated answer to evaluate.
+
+    Returns:
+        dict or None: A dictionary with the key "hallucination list" containing detected spans,
+                      or None if no valid JSON output is parsed.
+
+    Process:
+        - Loads a hallucination judgment model (Llama-3.3-70B-Instruct).
+        - Converts the input into a hallucination detection prompt via `process_dialog_to_single_turn`.
+        - Passes the prompt to the model using a system/user message format.
+        - Extracts the hallucination output from the model’s response by locating and parsing JSON-like substrings.
+        - Returns the first valid JSON dictionary found, if any.
+    """
+
     print("Loading LLM as a judge model............")
     model_id =   "unsloth/Llama-3.3-70B-Instruct-bnb-4bit"       
 
@@ -159,7 +230,24 @@ def detect_hallucination(data):
 
 
 
+
 def compare_semantic_similarity(embedder, text1, text2):
+    """
+    Computes the semantic similarity score between two text inputs using a sentence embedding model.
+
+    Args:
+        embedder (SentenceTransformer): Preloaded sentence embedding model (e.g., SBERT).
+        text1 (str): The first text input.
+        text2 (str): The second text input.
+
+    Returns:
+        float: Cosine similarity score between the two text embeddings (range: -1 to 1).
+
+    Process:
+        - Encodes both input texts into dense vector representations using the embedder.
+        - Computes the cosine similarity between the two vectors using `pytorch_cos_sim`.
+        - Extracts and returns the similarity score as a float.
+    """
     emb1 = embedder.encode(text1, convert_to_tensor=True)
     emb2 = embedder.encode(text2, convert_to_tensor=True)
     similarity = util.pytorch_cos_sim(emb1, emb2)
@@ -167,6 +255,27 @@ def compare_semantic_similarity(embedder, text1, text2):
 
 
 def analyze_context_influence(query, contexts, base_response):
+    """
+    Performs ablation testing to analyze the influence of each context chunk on the generated response.
+
+    Args:
+        query (str): The original input question.
+        contexts (list of str): List of context chunks used to generate the base response.
+        base_response (str): The original response generated using all context chunks.
+
+    Returns:
+        list of tuples: Each tuple contains (index, similarity) where:
+            - index: Index of the removed context chunk.
+            - similarity: Semantic similarity between the new and original response.
+
+    Process:
+        - Loads a lightweight SBERT model for semantic similarity comparison.
+        - Iteratively removes one context chunk at a time from the full set.
+        - Regenerates the answer using the reduced context.
+        - Computes the semantic similarity between the new response and the base response.
+        - Returns a list of similarity scores to quantify the contribution of each context chunk.
+    """
+
     # Load SBERT model
     embedder = SentenceTransformer('all-MiniLM-L6-v2')  # small, fast, effective
 
@@ -187,7 +296,27 @@ def analyze_context_influence(query, contexts, base_response):
 
 
 
+
 def extract_rationale(query, contexts, answer):
+    """
+    Extracts the most relevant context spans that justify the generated answer using an LLM prompt.
+
+    Args:
+        query (str): The original user question.
+        contexts (list of str or tuples): List of context chunks used for answering the query.
+        answer (str): The generated answer to be justified.
+
+    Returns:
+        str: A bullet-pointed list of context segments identified as rationale for the answer.
+
+    Process:
+        - Converts context tuples (if present) to plain strings.
+        - Joins all context chunks into a single block of text.
+        - Constructs a prompt instructing the model to extract only the essential supporting content.
+        - Uses a strict instruction format to avoid reasoning or summarization.
+        - Passes the prompt to the LLM (DeepSeek-Llama) for generation.
+        - Extracts the rationale list from the output by parsing after the instruction marker.
+    """
 
     # Ensure contexts are strings
     if isinstance(contexts[0], tuple):

@@ -51,6 +51,32 @@ B_INST, E_INST = "[INST]", "[/INST]"
 
 
 def process_dialog(dialog, tokenizer, min_turn_idx=0, return_prompt=False):
+    """
+    Converts a multi-turn dialog into tokenized inputs and masked labels for supervised fine-tuning.
+
+    Args:
+        dialog (list of str): Alternating list of user prompts and assistant responses (e.g., [user, assistant, user, assistant, ...]).
+        tokenizer (transformers.PreTrainedTokenizer): Tokenizer used for encoding the dialog turns.
+        min_turn_idx (int, optional): Minimum turn index from which labels start being supervised. Earlier turns are masked. Default is 0.
+        return_prompt (bool, optional): If True, returns only the reconstructed prompt string. Default is False.
+
+    Returns:
+        Union[Tuple[list, list], str]: 
+            - If return_prompt is False, returns (inputs, labels) where:
+                - inputs (list of int): Token IDs of the full dialog.
+                - labels (list of int): Token labels with IGNORE_INDEX (-100) for masked tokens.
+            - If return_prompt is True, returns the prompt string used in the final turn.
+
+    Process:
+        - Asserts the dialog is at least two entries and trims it to an even number of turns.
+        - Iterates over each turn pair (user, assistant):
+            - Constructs the formatted instruction pair with special tokens.
+            - Encodes each turn to token IDs and prepares corresponding labels.
+            - Applies label masking before `min_turn_idx` to exclude earlier history from supervision.
+        - Truncates both inputs and labels to the model's max length.
+        - Returns either the tokenized input-label pair or just the prompt, depending on `return_prompt`.
+    """
+
     IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
     assert len(dialog)>=2
     dialog = dialog[:2*len(dialog)//2]
@@ -92,7 +118,37 @@ def process_dialog(dialog, tokenizer, min_turn_idx=0, return_prompt=False):
 
 
 
+
+
+
+
 def process_dialog_to_single_turn(data, tokenizer, return_prompt=False):
+    """
+    Prepares a single-turn hallucination detection prompt and optionally tokenizes it for model training.
+
+    Args:
+        data (dict): A dictionary containing:
+            - 'task_type' (str): Task type, one of ['QA', 'Summary', 'Data2txt'].
+            - 'question' (str): (Required for QA) The input question.
+            - 'reference' (str or list): The context used to generate the response.
+            - 'response' (str): The generated output to be evaluated.
+            - 'labels' (list of dict): Hallucination annotations with 'text' and 'start' keys.
+        tokenizer (transformers.PreTrainedTokenizer): Tokenizer used to convert text into model inputs.
+        return_prompt (bool, optional): If True, returns only the raw prompt text. Default is False.
+
+    Returns:
+        Union[str, Tuple[list, list]]:
+            - If `return_prompt=True`: returns the formatted prompt string.
+            - If `return_prompt=False`: returns a tuple (inputs, labels) for training, with hallucination annotations.
+
+    Process:
+        - Constructs the hallucination detection prompt based on task type using pre-defined templates.
+        - If only the prompt is needed, returns the formatted string.
+        - Otherwise:
+            - Extracts hallucinated spans from the labels.
+            - Converts the prompt and JSON label to input-label token sequences using `process_dialog`.
+    """
+
     if data['task_type']=='QA':
         prompt = TEMPLATES[data['task_type']].format(
             question=data['question'], 
