@@ -1,0 +1,10 @@
+torch
+transformers
+sentence-transformers
+scikit-learn
+peft
+pdfplumber
+pandas
+numpy
+tqdm
+accelerate
