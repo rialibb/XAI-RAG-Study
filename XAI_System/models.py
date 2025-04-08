@@ -351,7 +351,7 @@ def extract_rationale(query, contexts, answer):
     # Run generation with strict prompt
     generator = pipeline(
         "text-generation",
-        model= "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+        model= "unsloth/Llama-3.3-70B-Instruct-bnb-4bit",
         model_kwargs={"torch_dtype": torch.bfloat16},
         device_map="auto"
     )
