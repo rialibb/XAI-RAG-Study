@@ -26,18 +26,18 @@ We combine **retrieval benchmarking**, **hallucination detection**, **ablation t
 
 ```bash
 .
-├── main.py                         # Entry point to run the full XAI pipeline
-├── XAI_System/                    # Core logic for explainable RAG
+├── main.py                        # Entry point to run the full Production pipeline, as well as Hallucination and retrieval benchmarking
+├── Production_Pipeline/           # Core logic for explainable RAG
 │   ├── models.py                  # Retrieval, generation, hallucination detection, ablation, rationale
 │   ├── pipeline.py                # Full RAG + XAI workflow orchestration
 │   └── preprocessing.py           # PDF text and table extraction for financial documents
 │
-├── Retrieval_study/              # Retrieval performance benchmarking
+├── Retrieval_study/               # Retrieval performance benchmarking
 │   ├── pipeline.py                # Runs experiments on FinQA and TATQA (RAGBench dataset)
 │   ├── retrievals.py              # Retrieval strategies (E5, FinBERT, Contriever, FinGPT)
 │   └── metrics.py                 # Evaluation metrics (Recall, NDCG, etc.)
 │
-├── Hallucination_study/          # Hallucination detection evaluation
+├── Hallucination_study/           # Hallucination detection evaluation
 │   ├── pipeline.py                # Evaluation loop
 │   ├── dataset.py                 # Prompt formatting
 │   ├── prepare_dataset.py         # Preprocessing from RAGTruth dataset
