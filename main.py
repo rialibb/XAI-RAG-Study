@@ -1,4 +1,4 @@
-from XAI_System.pipeline import run_xai_system
+from Production_Pipeline.pipeline import run_xai_system
 from Retrieval_study.pipeline import run_retrieval_study
 from Hallucination_study.pipeline import run_hallucination_study
 

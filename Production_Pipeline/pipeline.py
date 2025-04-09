@@ -1,9 +1,9 @@
-from XAI_System.models import (retrieve_with_contriever,
+from Production_Pipeline.models import (retrieve_with_contriever,
                     generate_llm_response, 
                     detect_hallucination,
                     analyze_context_influence,
                     extract_rationale)
-from XAI_System.preprocessing import preprocess_pdf
+from Production_Pipeline.preprocessing import preprocess_pdf
 
 
 
