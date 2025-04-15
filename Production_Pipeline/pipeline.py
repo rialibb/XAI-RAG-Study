@@ -82,12 +82,12 @@ def run_xai_system(
     )
     rationale_output = extract_rationale(generator, query, contexts, response)
     print(rationale_output)
-    faithfulness = extract_metrics(
-        generator,
-        faithfulness_prompt,
-        lambda x: JSON_metric_parser(x, ["faithfulness"]),
-        query,
-        contexts,
-        response,
-    )
-    print(faithfulness)
+    # faithfulness = extract_metrics(
+    #     generator,
+    #     faithfulness_prompt,
+    #     lambda x: JSON_metric_parser(x, ["faithfulness"]),
+    #     query,
+    #     contexts,
+    #     response,
+    # )
+    # print(faithfulness)
