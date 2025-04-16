@@ -27,6 +27,7 @@ We combine **retrieval benchmarking**, **hallucination detection**, **ablation t
 ```bash
 .
 ├── main.py                        # Entry point to run the full Production pipeline, as well as Hallucination and retrieval benchmarking
+│
 ├── Production_Pipeline/           # Core logic for explainable RAG
 │   ├── models.py                  # Retrieval, generation, hallucination detection, ablation, rationale
 │   ├── pipeline.py                # Full RAG + XAI workflow orchestration
@@ -41,7 +42,16 @@ We combine **retrieval benchmarking**, **hallucination detection**, **ablation t
 │   ├── pipeline.py                # Evaluation loop
 │   ├── dataset.py                 # Prompt formatting
 │   ├── prepare_dataset.py         # Preprocessing from RAGTruth dataset
-│   └── dataset/                   # Contains the formatted train/dev/test sets
+│   ├── Factor_classification.ipynb # Test a classifier on top of LLM as a judge
+│   ├── dataset/                   # Contains the formatted train/dev/test sets
+│   └── data_backup                # dataset needed in Factor_classification.ipynb 
+│
+├── Explainability_study/          # LLM-based QA answer evaluation using TAT-QA dataset
+│   └── tat_qa_token_shap.ipynb    # Computes faithfulness, hallucination, and relevance scores for TAT-QA examples using LLaMA3-70B
+│
+├── Progress_Reports/              # All progress reports presentations dureing the project implementation
+│
+├── REPORT.pdf                     # report of the project
 │
 └── requirements.txt               # Dependencies
 ```
